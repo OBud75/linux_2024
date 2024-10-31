@@ -29,3 +29,8 @@ Dans un fichier .py ou .sh:
 		- Isoler les balises title et meta: description
 		- Enlever les balises (on veut le contenu sans les balises)
 		- Appeler le fichier .sql avec en arguments les valeurs récupérées
+
+
+> https://www.scrapingbee.com/blog/web-scraping-with-linux-and-bash/
+> https://www.postgresql.org/docs/current/libpq-envars.html
+> https://stackoverflow.com/questions/9736085/run-a-postgresql-sql-file-using-command-line-arguments
