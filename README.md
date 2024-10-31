@@ -18,10 +18,14 @@ libpq-dev postgresql postgresql-contrib /
 ## Pseudocode
 fichier .sql qui insert ligne par ligne (permet de tester séparément le SQL)
 Dans un fichier .py ou .sh:
+
 	- Requete http GET sur readi.fi/sitemap.xml
+ 
 	- Filtrer les urls qui commencent par /asset
+ 
 	- Mettre le tout dans un fichier temporaire ou dans une variable du script
-	- Faire dans une loop une autre requete GET sur le fichier / variable
+
+ 	- Faire dans une loop une autre requete GET sur le fichier / variable
 		- Isoler les balises title et meta: description
 		- Enlever les balises (on veut le contenu sans les balises)
 		- Appeler le fichier .sql avec en arguments les valeurs récupérées
