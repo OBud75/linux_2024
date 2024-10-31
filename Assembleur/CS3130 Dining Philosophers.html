@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>CS3130: Dining Philosophers</title>
+  <meta name="description" content="">
+
+  <link rel="stylesheet" href="CS3130%20Dining%20Philosophers_files/main.css">
+  <link rel="canonical" href="https://www.cs.virginia.edu/~cr4bd/3130/S2024/labhw/dp.html">
+  <link rel="stylesheet" href="CS3130%20Dining%20Philosophers_files/katex.css">
+  <script defer="defer" src="CS3130%20Dining%20Philosophers_files/katex.js"></script>
+  <script>document.addEventListener("DOMContentLoaded", function () {
+   var mathElements = document.getElementsByClassName("math");
+   for (var i = 0; i < mathElements.length; i++) {
+    var texText = mathElements[i].firstChild;
+    if (mathElements[i].tagName == "SPAN") {
+     var content = texText.textContent;
+     if (content.substring(0, 1) == "$") {
+	 content = content.substring(1, content.length - 1);
+     }
+     katex.render(content, mathElements[i], {
+      displayMode: mathElements[i].classList.contains('display'),
+      throwOnError: false,
+      fleqn: false
+     });
+  }}});
+  </script>
+</head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper">
+
+    <a class="site-title" href="https://www.cs.virginia.edu/~cr4bd/3130/S2024/">CS 3130 Spring 2024</a>
+
+    <nav class="site-nav" aria-label="Site Menu">
+      <span class="menu-icon">
+        <svg viewBox="0 0 18 15" width="18px" height="15px">
+          <path fill="#424242" d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.031C17.335,0,18,0.665,18,1.484L18,1.484z"></path>
+          <path fill="#424242" d="M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0c0-0.82,0.665-1.484,1.484-1.484 h15.031C17.335,6.031,18,6.696,18,7.516L18,7.516z"></path>
+          <path fill="#424242" d="M18,13.516C18,14.335,17.335,15,16.516,15H1.484C0.665,15,0,14.335,0,13.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"></path>
+        </svg>
+      </span>
+
+      <div class="trigger"><a class="page-link" href="https://www.cs.virginia.edu/~cr4bd/3130/S2024/exams.html">Study Materials</a><a class="page-link" href="https://www.cs.virginia.edu/~cr4bd/3130/S2024/">Main/Readings</a><a class="page-link" href="https://www.cs.virginia.edu/~cr4bd/3130/S2024/oh.html">Office Hours</a><a class="page-link" href="https://www.cs.virginia.edu/~cr4bd/3130/S2024/policies.html">Policies</a><a class="page-link" href="https://www.cs.virginia.edu/~cr4bd/3130/S2024/assignments.html">HWs+Labs</a><a class="page-link" target="_top" href="https://kytos02.cs.virginia.edu/cs3130-spring2024/quizzes/">Quizzes</a><a class="page-link" target="_top" href="https://kytos02.cs.virginia.edu/cs3130-spring2024/">Submission</a><a class="page-link" href="https://www.cs.virginia.edu/~cr4bd/3130/S2024/schedule.html">Schedule</a></div>
+    </nav>
+
+  </div>
+
+  <!-- <div class="oldsite">This website may change (perhaps significantly) before the semester starts.</div> -->
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <nav id="toc" aria-label="Table of Contents"><ul>
+<li><a href="#logistics" id="toc-logistics"><span class="toc-section-number">1</span> Logistics</a></li>
+<li><a href="#task" id="toc-task"><span class="toc-section-number">2</span> Task</a>
+<ul>
+<li><a href="#deadlocking-code" id="toc-deadlocking-code"><span class="toc-section-number">2.1</span> Deadlocking code</a></li>
+<li><a href="#approach-1-arbitrator" id="toc-approach-1-arbitrator"><span class="toc-section-number">2.2</span> Approach 1: Arbitrator</a></li>
+<li><a href="#approach-2-resource-hierarchy" id="toc-approach-2-resource-hierarchy"><span class="toc-section-number">2.3</span> Approach 2: Resource
+hierarchy</a></li>
+<li><a href="#approach-3-retry-with-backoff" id="toc-approach-3-retry-with-backoff"><span class="toc-section-number">2.4</span> Approach 3 : Retry with
+backoff</a></li>
+</ul></li>
+<li><a href="#check-off" id="toc-check-off"><span class="toc-section-number">3</span> Check off</a></li>
+</ul></nav>
+<div class="changelog">
+<p>Changelog:</p>
+<ul>
+<li>25 March 2024: update deadlocking code to use barriers to hopefully
+make deadlock more consistent, instead of hvaing separate advice about
+using barriers</li>
+<li>27 March 2024: remove stray backticks in commands</li>
+<li>27 March 2024: correct <q>four approaches</q> to <q>three
+approaches</q></li>
+</ul>
+</div>
+<h1 data-number="1" id="logistics"><span class="header-section-number">1</span> Logistics</h1>
+<p>We encourage group work with <q>buddy programming</q>..</p>
+<p>Buddy programming is when</p>
+<ul>
+<li>You each create your own code</li>
+<li>You share development, looking at one another’s work and so on</li>
+<li>You catch each other up if one is behind or stuck</li>
+</ul>
+<h1 data-number="2" id="task"><span class="header-section-number">2</span> Task</h1>
+<p>We provide a threaded implementation of the <a href="https://en.wikipedia.org/wiki/Dining_philosophers_problem">Dining
+Philosophers problem</a>. This is a famous, if somewhat contrived,
+example of deadlock. You’ll modify it to not have deadlock. We give
+three approaches to this; you’ll need to do at least two and make
+significant progress on a third.</p>
+<h2 data-number="2.1" id="deadlocking-code"><span class="header-section-number">2.1</span> Deadlocking code</h2>
+<div class="sourceCode" id="cb1"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="pp">#include </span><span class="im">&lt;stdio.h&gt;</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="pp">#include </span><span class="im">&lt;stdlib.h&gt;</span><span class="pp"> </span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="pp">#include </span><span class="im">&lt;pthread.h&gt;</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="pp">#include </span><span class="im">&lt;unistd.h&gt;</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>pthread_barrier_t barrier<span class="op">;</span> <span class="co">// optional: to hopefully make deadlock more consistent</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>pthread_t philosopher<span class="op">[</span><span class="dv">5</span><span class="op">];</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>pthread_mutex_t chopstick<span class="op">[</span><span class="dv">5</span><span class="op">];</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> <span class="op">*</span>eat<span class="op">(</span><span class="dt">void</span> <span class="op">*</span>arg<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> n <span class="op">=</span> <span class="op">(</span><span class="dt">int</span><span class="op">)</span> <span class="op">(</span><span class="dt">long</span><span class="op">)</span>arg<span class="op">;</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>    <span class="co">// optional: sync up threads to make deadlock hopefully happen more consistently</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>    pthread_barrier_wait<span class="op">(&amp;</span>barrier<span class="op">);</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>    <span class="co">// take two chopsticks</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>    pthread_mutex_lock<span class="op">(&amp;</span>chopstick<span class="op">[</span>n<span class="op">]);</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>    printf<span class="op">(</span><span class="st">"Philosopher %d got chopstick %d</span><span class="sc">\n</span><span class="st">"</span><span class="op">,</span> n<span class="op">,</span> n<span class="op">);</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>    pthread_mutex_lock<span class="op">(&amp;</span>chopstick<span class="op">[(</span>n<span class="op">+</span><span class="dv">1</span><span class="op">)%</span><span class="dv">5</span><span class="op">]);</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>    printf<span class="op">(</span><span class="st">"Philosopher %d got chopstick %d</span><span class="sc">\n</span><span class="st">"</span><span class="op">,</span> n<span class="op">,</span> <span class="op">(</span>n<span class="op">+</span><span class="dv">1</span><span class="op">)%</span><span class="dv">5</span><span class="op">);</span></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>    printf <span class="op">(</span><span class="st">"Philosopher %d is eating</span><span class="sc">\n</span><span class="st">"</span><span class="op">,</span>n<span class="op">);</span></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>    sleep<span class="op">(</span><span class="dv">1</span><span class="op">);</span></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>    <span class="co">// set them back down</span></span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>    printf<span class="op">(</span><span class="st">"Philosopher %d set down chopstick %d</span><span class="sc">\n</span><span class="st">"</span><span class="op">,</span> n<span class="op">,</span> <span class="op">(</span>n<span class="op">+</span><span class="dv">1</span><span class="op">)%</span><span class="dv">5</span><span class="op">);</span></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>    pthread_mutex_unlock<span class="op">(&amp;</span>chopstick<span class="op">[(</span>n<span class="op">+</span><span class="dv">1</span><span class="op">)%</span><span class="dv">5</span><span class="op">]);</span></span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>    printf<span class="op">(</span><span class="st">"Philosopher %d set down chopstick %d</span><span class="sc">\n</span><span class="st">"</span><span class="op">,</span> n<span class="op">,</span> n<span class="op">);</span></span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>    pthread_mutex_unlock<span class="op">(&amp;</span>chopstick<span class="op">[</span>n<span class="op">]);</span></span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> NULL<span class="op">;</span></span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> main<span class="op">(</span><span class="dt">int</span> argc<span class="op">,</span> <span class="dt">const</span> <span class="dt">char</span> <span class="op">*</span>argv<span class="op">[])</span> <span class="op">{</span></span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>    pthread_barrier_init<span class="op">(&amp;</span>barrier<span class="op">,</span> NULL<span class="op">,</span> <span class="dv">5</span><span class="op">);</span></span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span><span class="op">(</span><span class="dt">int</span> i <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> i <span class="op">&lt;</span> <span class="dv">5</span><span class="op">;</span> i <span class="op">+=</span> <span class="dv">1</span><span class="op">)</span></span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a>        pthread_mutex_init<span class="op">(&amp;</span>chopstick<span class="op">[</span>i<span class="op">],</span> NULL<span class="op">);</span></span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span><span class="op">(</span><span class="dt">int</span> i <span class="op">=</span><span class="dv">0</span><span class="op">;</span> i <span class="op">&lt;</span> <span class="dv">5</span><span class="op">;</span> i <span class="op">+=</span> <span class="dv">1</span><span class="op">)</span></span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a>        pthread_create<span class="op">(&amp;</span>philosopher<span class="op">[</span>i<span class="op">],</span> NULL<span class="op">,</span> eat<span class="op">,</span> <span class="op">(</span><span class="dt">void</span> <span class="op">*)(</span><span class="dt">size_t</span><span class="op">)</span>i<span class="op">);</span></span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span><span class="op">(</span><span class="dt">int</span> i<span class="op">=</span><span class="dv">0</span><span class="op">;</span> i <span class="op">&lt;</span> <span class="dv">5</span><span class="op">;</span> i <span class="op">+=</span> <span class="dv">1</span><span class="op">)</span></span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a>        pthread_join<span class="op">(</span>philosopher<span class="op">[</span>i<span class="op">],</span> NULL<span class="op">);</span></span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span><span class="op">(</span><span class="dt">int</span> i<span class="op">=</span><span class="dv">0</span><span class="op">;</span> i <span class="op">&lt;</span> <span class="dv">5</span><span class="op">;</span> i <span class="op">+=</span> <span class="dv">1</span><span class="op">)</span></span>
+<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a>        pthread_mutex_destroy<span class="op">(&amp;</span>chopstick<span class="op">[</span>i<span class="op">]);</span></span>
+<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a>    pthread_barrier_destroy<span class="op">(&amp;</span>barrier<span class="op">);</span></span>
+<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-51"><a href="#cb1-51" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>This can be run as</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">clang</span> <span class="at">-O2</span> <span class="at">-lpthread</span> dp.c <span class="kw">&amp;&amp;</span> <span class="ex">./a.out</span></span></code></pre></div>
+<p>Because thread scheduling is somewhat random in practice, you may
+need to run the program several times in a row to see a deadlock.</p>
+<p>To help identify deadlocks and other synchronization problems more
+reliably, we strongly recommend using ThreadSanitizer:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">clang</span> <span class="at">-O2</span> <span class="at">-lpthread</span> <span class="at">-fsanitize</span><span class="op">=</span>thread dp.c <span class="kw">&amp;&amp;</span> <span class="ex">./a.out</span></span></code></pre></div>
+<p>This will run slower (though not noticably so for this program), but
+tries to idenitfy cases where the program does not implement a resource
+hierarchy strategy (that is, does not use consistent order for acquiring
+locks). It also will (with varying reliablity) detect several other
+kinds of thread usage errors (like race conditions).</p>
+<h2 data-number="2.2" id="approach-1-arbitrator"><span class="header-section-number">2.2</span> Approach 1: Arbitrator</h2>
+<blockquote>
+<p>Submission filename: <code>dp-arb.c</code></p>
+</blockquote>
+<p>Ensure there is no deadlock by using the <a href="https://en.wikipedia.org/wiki/Dining_philosophers_problem#Arbitrator_solution">Arbitrator
+solution</a>. A correct solution can be just four lines:</p>
+<ol type="1">
+<li>declare a global arbitrator mutex</li>
+<li>initialize that mutex in <code>main</code></li>
+<li>lock it and</li>
+<li>unlock it, both in <code>eat</code>, so that only one philosopher
+can reach for chopsticks at a time</li>
+</ol>
+<p>(This is not one of the deadlock prevention strategies we discussed
+in lecture, but it makes the thread take turns waiting for resources
+(the chopsticks), so only one thread can wait at a time. With only one
+thread waiting at a time, we can’t have a cyclic dependency.)</p>
+<p>If correctly implemented,</p>
+<ul>
+<li>There will be no deadlock; the program will always terminate</li>
+<li>The output will never have two <q>Philosopher <em>i</em> got
+chopstick</q> lines with a different <q>Philosopher <em>j</em> got
+chopstick</q> line in between</li>
+</ul>
+<p>(When this strategy is run under ThreadSanitizer, it may report that
+there is a <q>lock order inversion</q> representing a potential
+deadlock, because thread sanitizer is checking for the constistent lock
+order solution for preventing deadlock; it’s not programmed to identify
+this strategy.)</p>
+<h2 data-number="2.3" id="approach-2-resource-hierarchy"><span class="header-section-number">2.3</span> Approach 2: Resource
+hierarchy</h2>
+<blockquote>
+<p>Submission filename: <code>dp-rh.c</code></p>
+</blockquote>
+<p>This implementation should ensure there is no deadlock by using the
+<a href="https://en.wikipedia.org/wiki/Dining_philosophers_problem#Resource_hierarchy_solution">Resource
+hierarchy solution</a>.</p>
+<p>Require every philosopher to pick up their lower-numbered chopstick
+before their higher-numbered chopstick.</p>
+<p>If correctly implemented,</p>
+<ul>
+<li>There will be no deadlock; the program will always terminate</li>
+<li>After a <q>Philosopher <em>i</em> got chopstick <em>j</em></q> line,
+any following <q>Philosopher <em>i</em> got chopstick <em>k</em></q>
+line will have a <em>k</em> &gt; <em>j</em>.</li>
+</ul>
+<h2 data-number="2.4" id="approach-3-retry-with-backoff"><span class="header-section-number">2.4</span> Approach 3 : Retry with
+backoff</h2>
+<blockquote>
+<p>Submission filename: <code>dp-backoff.c</code></p>
+</blockquote>
+<p>This implementation should ensure there is no deadlock by acquiring
+the lock on the second chopstick in a way that will fail if it is
+already locked. If acquiring the second chopstick fails, it should set
+down the first chopstick, and retry the whole process.</p>
+<p>To avoid <q>livelock</q> where threads continue retrying
+indefinitely, threads should use <em>randomized exponential backoff</em>
+to limit how often retry and make it unlikely that two threads which
+both decide to retry at the same time end up retrying at the same
+time.</p>
+<p>For example:</p>
+<ul>
+<li>after locking fails the first time, a thread could wait a
+pseudorandomly chosen amount of time between 50 and 100
+microseconds</li>
+<li>after locking fails a second time, a thread could wait a
+pseudorandomly chosen amount of time between 100 and 200
+microseconds</li>
+<li>after locking fails a third time, a thread could wait a
+pseudorandomly chosen amount of time between 200 and 400
+microseconds</li>
+<li>and so on</li>
+</ul>
+<p>Your implementation can vary the amount of time threads wait so long
+as:</p>
+<ul>
+<li>the average increases by a multiplicative factor each time (to keep
+threads from hogging all the processor time just retrying); and</li>
+<li>the exact amount of time is always randomized (so threads that
+started being exactly in sync with each other will not stay in
+sync)</li>
+</ul>
+<p>You can use:</p>
+<ul>
+<li><code>pthread_mutex_trylock</code> to attempt to get a mutex lock
+and detect when this is not immediately possible.
+<code>pthread_mutex_trylock</code> will return 0 when successful, and
+some non-zero value when locking fails.</li>
+<li><code>rand()</code> to generate pseudorandom numbers and
+<code>usleep()</code> or <code>nanosleep()</code> to have threads wait
+for varying amounts of time.</li>
+</ul>
+<p>If successful:</p>
+<ul>
+<li>There will be no deadlock; the program will always terminate.</li>
+<li>One philosopher will usually end up trying to acquire the lock
+several times before succeeding.</li>
+</ul>
+<h1 data-number="3" id="check-off"><span class="header-section-number">3</span> Check off</h1>
+<p>Either:</p>
+<ul>
+<li>submit solutions for all the approaches</li>
+<li>OR have a TA see your program working:
+<ul>
+<li>at least two of the required approaches should be completed;</li>
+<li>the remaining approach should have significant progress</li>
+</ul></li>
+</ul>
+<p>For an in-person checkoff, TAs may ask to see your code and ask a
+questions along the lines of <q>why this line here instead of there?</q>
+which all team members should be prepared to answer.</p>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/~cr4bd/3130/S2024/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">CS 3130 Spring 2024</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">Charles Reiss</li><li><a class="u-email" href="mailto:creiss@virginia.edu">creiss@virginia.edu</a></li></ul>
+      </div>
+      <div class="footer-col footer-col-2">
+        By Luther Tychnoviech and Charles Reiss.
+        Released under the <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/"><img alt="Creative Commons License" style="border-width:0" src="CS3130%20Dining%20Philosophers_files/88x31.png"> CC-BY-NC-SA 4.0</a>.
+      </div>
+
+      <div class="footer-col footer-col-3">
+        <p></p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+
+
+
+</body></html>

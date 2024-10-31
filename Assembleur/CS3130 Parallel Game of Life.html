@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>CS3130: Parallel Game of Life</title>
+  <meta name="description" content="">
+
+  <link rel="stylesheet" href="CS3130%20Parallel%20Game%20of%20Life_files/main.css">
+  <link rel="canonical" href="https://www.cs.virginia.edu/~cr4bd/3130/S2024/labhw/life.html">
+  <link rel="stylesheet" href="CS3130%20Parallel%20Game%20of%20Life_files/katex.css">
+  <script defer="defer" src="CS3130%20Parallel%20Game%20of%20Life_files/katex.js"></script>
+  <script>document.addEventListener("DOMContentLoaded", function () {
+   var mathElements = document.getElementsByClassName("math");
+   for (var i = 0; i < mathElements.length; i++) {
+    var texText = mathElements[i].firstChild;
+    if (mathElements[i].tagName == "SPAN") {
+     var content = texText.textContent;
+     if (content.substring(0, 1) == "$") {
+	 content = content.substring(1, content.length - 1);
+     }
+     katex.render(content, mathElements[i], {
+      displayMode: mathElements[i].classList.contains('display'),
+      throwOnError: false,
+      fleqn: false
+     });
+  }}});
+  </script>
+</head>
+<body><header class="site-header" role="banner">
+
+  <div class="wrapper">
+
+    <a class="site-title" href="https://www.cs.virginia.edu/~cr4bd/3130/S2024/">CS 3130 Spring 2024</a>
+
+    <nav class="site-nav" aria-label="Site Menu">
+      <span class="menu-icon">
+        <svg viewBox="0 0 18 15" width="18px" height="15px">
+          <path fill="#424242" d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.031C17.335,0,18,0.665,18,1.484L18,1.484z"></path>
+          <path fill="#424242" d="M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0c0-0.82,0.665-1.484,1.484-1.484 h15.031C17.335,6.031,18,6.696,18,7.516L18,7.516z"></path>
+          <path fill="#424242" d="M18,13.516C18,14.335,17.335,15,16.516,15H1.484C0.665,15,0,14.335,0,13.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"></path>
+        </svg>
+      </span>
+
+      <div class="trigger"><a class="page-link" href="https://www.cs.virginia.edu/~cr4bd/3130/S2024/exams.html">Study Materials</a><a class="page-link" href="https://www.cs.virginia.edu/~cr4bd/3130/S2024/">Main/Readings</a><a class="page-link" href="https://www.cs.virginia.edu/~cr4bd/3130/S2024/oh.html">Office Hours</a><a class="page-link" href="https://www.cs.virginia.edu/~cr4bd/3130/S2024/policies.html">Policies</a><a class="page-link" href="https://www.cs.virginia.edu/~cr4bd/3130/S2024/assignments.html">HWs+Labs</a><a class="page-link" target="_top" href="https://kytos02.cs.virginia.edu/cs3130-spring2024/quizzes/">Quizzes</a><a class="page-link" target="_top" href="https://kytos02.cs.virginia.edu/cs3130-spring2024/">Submission</a><a class="page-link" href="https://www.cs.virginia.edu/~cr4bd/3130/S2024/schedule.html">Schedule</a></div>
+    </nav>
+
+  </div>
+
+  <!-- <div class="oldsite">This website may change (perhaps significantly) before the semester starts.</div> -->
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <nav id="toc" aria-label="Table of Contents"><ul>
+<li><a href="#your-task" id="toc-your-task"><span class="toc-section-number">1</span> Your Task</a>
+<ul>
+<li><a href="#before-you-code" id="toc-before-you-code"><span class="toc-section-number">1.1</span> Before you code</a></li>
+<li><a href="#implement-parallel-life" id="toc-implement-parallel-life"><span class="toc-section-number">1.2</span> Implement parallel Life</a></li>
+<li><a href="#test-your-code." id="toc-test-your-code."><span class="toc-section-number">1.3</span> Test your code.</a></li>
+</ul></li>
+<li><a href="#tips" id="toc-tips"><span class="toc-section-number">2</span> Tips</a>
+<ul>
+<li><a href="#general-strategy" id="toc-general-strategy"><span class="toc-section-number">2.1</span> General strategy</a></li>
+<li><a href="#understanding-the-swap-and-alternatives" id="toc-understanding-the-swap-and-alternatives"><span class="toc-section-number">2.2</span> Understanding the swap and
+alternatives</a></li>
+<li><a href="#debugging" id="toc-debugging"><span class="toc-section-number">2.3</span> Debugging</a></li>
+<li><a href="#threadsanitizer-data-races" id="toc-threadsanitizer-data-races"><span class="toc-section-number">2.4</span> ThreadSanitizer <q>data
+races</q></a></li>
+</ul></li>
+<li><a href="#caveats" id="toc-caveats"><span class="toc-section-number">3</span> Caveats</a></li>
+</ul></nav>
+<h1 data-number="1" id="your-task"><span class="header-section-number">1</span> Your Task</h1>
+<h2 data-number="1.1" id="before-you-code"><span class="header-section-number">1.1</span> Before you code</h2>
+<p>Examine the supplied <a href="https://www.cs.virginia.edu/~cr4bd/3130/S2024/files/life-c-skeleton.tar">skeleton
+code</a> <em>[last updated 2023-04-06 3:50pm]</em> which implements <a href="https://en.wikipedia.org/wiki/Conway's_Game_of_Life">Conway’s
+Game of Life</a>. You should only edit <code>life-parallel.c</code>, but
+that interacts with many other files in the package.</p>
+<p>Make sure you look at <code>input/README.md</code>, as well as
+<code>life.h</code> and any other files you wish.</p>
+<p>The provided code will compile and run. We encourage experimenting
+with it before adding any code of your own.</p>
+<p>Make sure you understand how <code>simulate_life_serial</code> works.
+You’ll be making a (more complicated) parallel version of this, and are
+unlikely to be successful if you don’t understand this starting
+point.</p>
+<h2 data-number="1.2" id="implement-parallel-life"><span class="header-section-number">1.2</span> Implement parallel Life</h2>
+<p>Create a parallel version (using pthreads) in
+<code>life-parallel.c</code>. You must use the provided header</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> simulate_life_parallel<span class="op">(</span><span class="dt">int</span> threads<span class="op">,</span> LifeBoard <span class="op">*</span>state<span class="op">,</span> <span class="dt">int</span> steps<span class="op">)</span></span></code></pre></div>
+<p><code>life-serial.c</code> contains a correct, working
+single-threaded implementation you are welcome to borrow from. You
+should write helper functions as appropriate to keep your code
+well-organized.</p>
+<p>Additional constraints:</p>
+<ol type="1">
+<li><p>Your implementation must be correct (result in the expected final
+board configuration, matching the serial version) for all boards and
+iteration counts.</p></li>
+<li><p>You must call <code>pthread_create</code> exactly
+<code>threads</code> times (assuming you are computing cell values only
+in new threads you create; if you also compute cell values in the main
+(initial) thread, call it <code>threads-1</code> times instead). Do not
+create more or fewer threads, nor create new threads for each iteration
+of the simulation.</p></li>
+<li><p>We must be able to call <code>simulate_life_parallel</code> from
+multiple threads concurrently. Do not use global variables or other
+thread-unsafe practices.</p></li>
+<li><p>You must have no memory leaks or other memory errors. The
+provided <code>Makefile</code> builds a version with the address
+sanitizer enabled automatically as <code>life-asan</code>; this must run
+without errors.</p></li>
+<li><p>ThreadSanitizer should not detect likely race conditions or other
+thread API errors in your code. The provided <code>Makefile</code>
+builds a version with the thread sanitizer enabled automatically as
+<code>life-tsan</code>.</p></li>
+<li><p>You must call the appropriate <code>pthread_***_destroy</code>
+for each <code>pthread_***_init</code> you call to reclaim any
+pthreads-allocated memory.</p>
+<ol type="1">
+<li>On some older Linux machines, <code>pthread_barrier_destroy</code>
+won’t work properly unless called after <em>all</em>
+<code>pthread_barrier_wait</code> calls have <em>returned</em>. (This is
+a bug in the pthread_barrier implementation on those machines.)</li>
+</ol></li>
+<li><p>On a multi-core machine, your parallel code must be noticeably
+faster than the serial code when run on sufficiently large boards for
+sufficiently many iterations.</p></li>
+<li><p>On sufficiently large boards (both enough rows and enough
+columns), you should split up the work roughly evenly between the
+threads. (With large sizes, no thread should end up doing more than a
+few percent more computations than another.)</p>
+<p>(With small numbers of rows or columns, it is okay if the work is not
+split up as evenly. For extremely small numbers of rows or columns, it
+is okay if some threads have no work to do.)</p></li>
+<li><p>And, of course, you are still bound by all the usual <a href="https://www.cs.virginia.edu/~cr4bd/3130/S2024/labhw/policies.html#write-your-own-code">course policies</a>.</p></li>
+<li><p>You must not use OpenMP (subject of one of our labs) in your
+solution: we are trying to measure your understanding of the lower-level
+tools OpenMP uses.</p></li>
+</ol>
+<h2 data-number="1.3" id="test-your-code."><span class="header-section-number">1.3</span> Test your code.</h2>
+<p>Uncomment the lines of <code>main.c</code> that are marked as
+appropriate to uncomment after <code>simulate_life_parallel</code> is
+written. Then test your code, as e.g.&nbsp;by running</p>
+<ul>
+<li><p><code class="sourceCode bash"><span class="ex">./life</span></code> to see the
+usage hints.</p></li>
+<li><p><code class="sourceCode bash"><span class="ex">life-asan</span> 10 input/make-a time</code>
+to check for memory leaks and other memory errors (but do not trust its
+timing, the address sanitizer slows things down a lot).</p></li>
+<li><p><code class="sourceCode bash"><span class="ex">life-tsan</span> 10 input/make-a time</code>
+to check for race conditions and some other types of synchornization
+errors (but do not trust its timing, the address sanitizer slows things
+down a lot).</p>
+<ul>
+<li>if you get an error about a race condition with
+pthread_barrier_destroy and pthread_barrier_wait, see the first caveat
+below.</li>
+</ul></li>
+<li><p><code class="sourceCode bash"><span class="ex">./life</span> 0 input/o0075 serial-result</code>
+to ensure you can load an example file.</p></li>
+<li><p><code class="sourceCode bash"><span class="ex">./life</span> 110 input/o0075 serial-result</code>
+to ensure you can simulate an example file.</p></li>
+<li><p><code class="sourceCode bash"><span class="ex">./life</span> 10 input/make-a time</code>
+to time the <code>make-a</code> file with 10 steps.</p></li>
+<li><p><code class="sourceCode bash"><span class="ex">./time-examples.sh</span></code>
+to get a sense of how you are doing on parallel performance.</p></li>
+<li><p><code class="sourceCode bash"><span class="ex">./sanitizer-test.sh</span></code>
+to try a bunch of sizes in AddressSanitizer, ThreadSanitizer</p></li>
+</ul>
+<h1 data-number="2" id="tips"><span class="header-section-number">2</span> Tips</h1>
+<h2 data-number="2.1" id="general-strategy"><span class="header-section-number">2.1</span> General strategy</h2>
+<ol type="1">
+<li><p>This assignment was designed to be a natural fit for <a href="https://www.cs.virginia.edu/~cr4bd/3130/S2024/readings/pthreads.html#barrier">barriers</a>. You are strongly
+encourage to get a barrier-based solution working first before
+attempting any other approaches.</p></li>
+<li><p>You should choose some way to split up the grid between threads.
+You will get best performance if each thread works on a part of the grid
+that is contiguous in memory, so you get better locality within a
+thread. This also will avoid performance problems associated with two
+processors trying to modify data in different parts of the same cache
+block.</p></li>
+<li><p>To compute the value of a cell in generation <span class="math inline"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>i</mi></mrow><annotation encoding="application/x-tex">i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.6595em;"></span><span class="mord mathnormal">i</span></span></span></span></span>, one needs the value of its neighbors in
+generation <span class="math inline"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>i</mi><mo>−</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">i-1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.7429em; vertical-align: -0.0833em;"></span><span class="mord mathnormal">i</span><span class="mspace" style="margin-right: 0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right: 0.2222em;"></span></span><span class="base"><span class="strut" style="height: 0.6444em;"></span><span class="mord">1</span></span></span></span></span>. Barriers are one way to
+make sure that the values from generation <span class="math inline"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>i</mi><mo>−</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">i-1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.7429em; vertical-align: -0.0833em;"></span><span class="mord mathnormal">i</span><span class="mspace" style="margin-right: 0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right: 0.2222em;"></span></span><span class="base"><span class="strut" style="height: 0.6444em;"></span><span class="mord">1</span></span></span></span></span> are available before any thread starts
+computing generation <span class="math inline"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>i</mi></mrow><annotation encoding="application/x-tex">i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.6595em;"></span><span class="mord mathnormal">i</span></span></span></span></span>.</p></li>
+<li><p>You should be able to reuse almost all of the
+<code>simulate_life_serial</code> code. You will probably need to split
+it into at least two functions — one that represents the work done in
+separate threads and one that spawns the threads and waits for them to
+finish.</p></li>
+<li><p>If you find yourself tempted to use a global variable (such as a
+global mutex or barrier), you can usually get away with adding it as a
+field of a <code>struct</code> passed in by reference to your thread
+function’s <code>void *</code> parameter instead.</p></li>
+</ol>
+<h2 data-number="2.2" id="understanding-the-swap-and-alternatives"><span class="header-section-number">2.2</span> Understanding the swap and
+alternatives</h2>
+<ol type="1">
+<li><p>The supplied code calls <code>LB_swap()</code> to exchange
+boards. This means that the values in <code>state</code> are used to set
+<code>next_state</code>, then <code>next_state</code> is swapped to
+become <code>state</code>. We can visualize this as follows:</p>
+<p><img src="CS3130%20Parallel%20Game%20of%20Life_files/life-pattern-orig.svg" alt="diagram showing timeline with state/next_state, with operations using state to set next_state, then the two being swapped" style="width: 10em"></p>
+<p>If one uses that code as is, one must ensure that all threads stop
+accessing the boards before the swap happens and don’t start accessing
+the boards again until the swap finishes. Otherwise, threads could read
+values from the wrong version of the board and/or write values to the
+wrong version of the board.</p></li>
+<li><p>An alternative, which calls wait on barriers fewer times each
+iteration, is to avoid swapping by having an <q>even</q> state and
+<q>odd</q> state and choose which board to write to based on the
+generation number. (In even iterations, threads would use the <q>odd</q>
+version of the state to write to the <q>even</q> state; and in odd
+iterations, threads would use the <q>even</q> version of the state to
+write to the <q>odd</q> state.) This would result in a pattern that
+looks like this:</p>
+<p><img src="CS3130%20Parallel%20Game%20of%20Life_files/life-pattern-evenodd.svg" alt="diagram showing timeline with odd and even items, with operations using odd to set even, then using even to set odd" style="width: 10em"></p>
+<p>In this way, rather than waiting for the swap to finish before
+starting the next generation, threads just need to wait for all other
+threads to have finished the current generation. As long as threads have
+finished the current iteration, the values needed to compute the next
+iteration will be available and in a consistent location.</p></li>
+</ol>
+<h2 data-number="2.3" id="debugging"><span class="header-section-number">2.3</span> Debugging</h2>
+<ol type="1">
+<li><p>If your code hangs:</p>
+<ul>
+<li><p>you can run it in a debugger until it hangs, and then interrupt
+it (like with control-C) and examine where each thread is.</p>
+<p>For doing this in LLDB, see <a href="https://lldb.llvm.org/use/tutorial.html#examining-thread-state">their
+tutorial on examining thread state</a>.</p>
+<p>In GDB, you can use a command like
+<code>thread apply all backtrace</code> to get a backtrace from all
+threads, and <code>thread THREAD-ID</code> to switch to debugging the
+thread with a particular ID; see also <a href="https://sourceware.org/gdb/onlinedocs/gdb/Threads.html">the manual
+for debugging with threads in GDB</a>.</p></li>
+<li><p>several common mistakes with barriers that can cause hangs
+include:</p>
+<ul>
+<li><p>giving each thread its own copy of a barrier rather than having
+them share a single barrier (usually accessed using pointers);</p></li>
+<li><p>initializing a barrier with an incorrect thread count;</p></li>
+<li><p>destroying barriers while they are still in use;</p></li>
+<li><p>running into the issue with <code>pthread_barrier_destroy</code>
+mentioned in caveats;</p></li>
+</ul></li>
+</ul></li>
+<li><p>If your parallel code’s result disagrees with the serial
+code:</p>
+<ul>
+<li><p>I would recommend check to see if the sanitizer tests find
+problems first;</p></li>
+<li><p>Besides issues found by the sanitizer tests, common problems
+include:</p>
+<ul>
+<li><p>Not handling the same set of x, y values as the serial
+code.</p></li>
+<li><p>Unintentionally not sharing boards between threads</p></li>
+</ul></li>
+<li><p>You may find the very small input <code>input/tiny</code> useful
+for debugging; or you can modify it (in a text editor) into a slightly
+larger input;</p></li>
+<li><p>You can look at the actual board your parallel code computed
+using commands like
+<code>life-asan 10 input/tiny time-and-result</code>.</p></li>
+<li><p>You can call <code>LB_print</code> to print out the contents of a
+LifeBoard for debugging.</p></li>
+</ul></li>
+</ol>
+<h2 data-number="2.4" id="threadsanitizer-data-races"><span class="header-section-number">2.4</span> ThreadSanitizer <q>data
+races</q></h2>
+<ol type="1">
+<li>When ThreadSanitizer detects a potential data race, that means that
+it identified a case where you’re writing to some memory from one thread
+while another thread might also be writing or reading at the same time.
+The ThreadSanitizer output should show where in your code the write and
+the read/write are happening and also idenitfy the memory location where
+this happened.</li>
+</ol>
+<h1 data-number="3" id="caveats"><span class="header-section-number">3</span> Caveats</h1>
+<ul>
+<li><p>MacOS and OS X ship with only a subset of the pthreads library,
+notably excluding <code>pthread_barrier_t</code> and its associated
+functions. You should probably use portal, a virtual machine,
+etc.</p></li>
+<li><p>The version of <code>pthread_barrier_destroy</code> supplied with
+GNU libc version 2.22 and older requires that you do not call
+pthread_barrier_destroy until you are sure that <em>all</em> threads
+have first returned from <code>ptherad_barrier_wait</code>. This is a
+bug in the those machine’s version of the <code>libc</code>, see <a href="https://sourceware.org/legacy-ml/libc-alpha/2015-07/msg00585.html">this
+mailing list post</a> or <a href="https://sourceware.org/bugzilla/show_bug.cgi?id=13065">this
+bug</a>. This should not be a problem on portal/our testing machines,
+which have GNU libc version 2.35 (as of this writing).</p></li>
+</ul>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/~cr4bd/3130/S2024/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">CS 3130 Spring 2024</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">Charles Reiss</li><li><a class="u-email" href="mailto:creiss@virginia.edu">creiss@virginia.edu</a></li></ul>
+      </div>
+      <div class="footer-col footer-col-2">
+        By Charles ReissLuther Tychonievich.
+        Released under the <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/"><img alt="Creative Commons License" style="border-width:0" src="CS3130%20Parallel%20Game%20of%20Life_files/88x31.png"> CC-BY-NC-SA 4.0</a>.
+      </div>
+
+      <div class="footer-col footer-col-3">
+        <p></p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+
+
+
+</body></html>
