@@ -12,6 +12,10 @@ def sql(query, params=(), commit=False) -> Cursor:
         db_cursor.connection.commit()
     return db_cursor
 
+def create_tables() -> None:
+    sql(query="DROP TABLE IF EXISTS assets;")
+    sql(query="CREATE TABLE assets (title VARCHAR(255), description VARCHAR(255));")
+
 def insert(meta, description) -> None:
     query = "INSERT INTO assets(title, description) VALUES (?, ?);"
     sql(query=query, params=(meta, description), commit=True)
@@ -26,13 +30,12 @@ def get_urls(sitemap: str, section: str) -> list[str]:
 def get_meta_and_description(page):
     title = search(pattern=r"<title>(.*?)</title>", string=page)
     description = search(pattern=r'<meta name="description" content="(.*?)"/>', string=page)
-    return (title.group(1) if title else None, description.group(1) if description else None)
+    return title.group(1) if title else None, description.group(1) if description else None
 
 
 if __name__ == "__main__":
     db_cursor: Cursor = connect(database="db.sqlite3").cursor()
-    sql(query="DROP TABLE IF EXISTS assets;")
-    sql(query="CREATE TABLE assets (title VARCHAR(255), description VARCHAR(255));")
+    create_tables()
     for url in get_urls(sitemap=get_sitemap(), section="asset"):
         insert(*get_meta_and_description(page=get(url=url).text))
     print(f"{sql(query="SELECT COUNT(*) FROM assets;").fetchone()[0]} assets added.")
