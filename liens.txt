@@ -1,9 +1,8 @@
-How Computers Work 
-  - https://www.youtube.com/playlist?list=PLFt_AvWsXl0dPhqVsKt1Ni_46ARyiCGSq
-
 Documentations
   - https://docs.kernel.org/
   - https://doc.ubuntu-fr.org/
+  - https://www.gnu.org/
+  - https://www.gnu.org/savannah-checkouts/
 
 Python
   - https://docs.python.org/3/library/multiprocessing.html
@@ -15,10 +14,12 @@ Security guides
   - https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/7/html/security_guide/index
 
 Shell
+  - https://www.gnu.org/savannah-checkouts/gnu/bash/manual/bash.html#What-is-Bash_003f
   - https://mtodorovic.developpez.com/linux/programmation-avancee
   - https://ineumann.developpez.com/tutoriels/linux/bash-bonnes-pratiques/
   - https://ineumann.developpez.com/tutoriels/linux/exercices-shell/
 
-Chaines Youtube
+Chaines et playlists Youtube
+  - https://www.youtube.com/playlist?list=PLFt_AvWsXl0dPhqVsKt1Ni_46ARyiCGSq
   - https://www.youtube.com/@Underscore_
   - https://www.youtube.com/@LowLevelTV
