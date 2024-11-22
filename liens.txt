@@ -24,5 +24,7 @@ Chaines et playlists Youtube
   - https://www.youtube.com/@Underscore_
   - https://www.youtube.com/@LowLevelTV
   - https://www.youtube.com/@ComputerHistory/videos
+
   - https://youtu.be/2BdBfsXbST8?si=LnBZlVQj7GHH_Swg
+  - https://youtu.be/EE1R8FYUJm0?si=__TWcZYwmxW7lGet
   - https://youtu.be/O9upVbGSBFo?si=O2_zlsJVdad0pCtz
