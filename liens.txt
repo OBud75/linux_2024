@@ -1,16 +1,8 @@
 How Computers Work 
   - https://www.youtube.com/playlist?list=PLFt_AvWsXl0dPhqVsKt1Ni_46ARyiCGSq
 
-Bonnes pratiques écriture scripts bash
-  - https://ineumann.developpez.com/tutoriels/linux/bash-bonnes-pratiques/
-
-Programmation avancée sous linux
-  - https://mtodorovic.developpez.com/linux/programmation-avancee
-
-Assembleur
-  - https://ineumann.developpez.com/tutoriels/linux/exercices-shell/
-
-Documentation Ubuntu
+Documentations
+  - https://docs.kernel.org/
   - https://doc.ubuntu-fr.org/
 
 Python
@@ -21,3 +13,12 @@ Python
 Security guides
   - https://cheatsheetseries.owasp.org/
   - https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/7/html/security_guide/index
+
+Shell
+  - https://mtodorovic.developpez.com/linux/programmation-avancee
+  - https://ineumann.developpez.com/tutoriels/linux/bash-bonnes-pratiques/
+  - https://ineumann.developpez.com/tutoriels/linux/exercices-shell/
+
+Chaines Youtube
+  - https://www.youtube.com/@Underscore_
+  - https://www.youtube.com/@LowLevelTV
