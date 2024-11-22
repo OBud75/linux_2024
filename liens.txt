@@ -1,0 +1,23 @@
+How Computers Work 
+  - https://www.youtube.com/playlist?list=PLFt_AvWsXl0dPhqVsKt1Ni_46ARyiCGSq
+
+Bonnes pratiques écriture scripts bash
+  - https://ineumann.developpez.com/tutoriels/linux/bash-bonnes-pratiques/
+
+Programmation avancée sous linux
+  - https://mtodorovic.developpez.com/linux/programmation-avancee
+
+Assembleur
+  - https://ineumann.developpez.com/tutoriels/linux/exercices-shell/
+
+Documentation Ubuntu
+  - https://doc.ubuntu-fr.org/
+
+Python
+  - https://docs.python.org/3/library/multiprocessing.html
+  - https://docs.python.org/fr/3/library/threading.html
+  - https://docs.python.org/3/library/asyncio.html
+
+Security guides
+  - https://cheatsheetseries.owasp.org/
+  - https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/7/html/security_guide/index
