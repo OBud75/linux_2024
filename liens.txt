@@ -13,6 +13,10 @@ Security guides
   - https://cheatsheetseries.owasp.org/
   - https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/7/html/security_guide/index
 
+Cybersecurity
+  - https://www.cve.org/
+  - https://www.cvedetails.com/
+
 Shell
   - https://www.gnu.org/savannah-checkouts/gnu/bash/manual/bash.html#What-is-Bash_003f
   - https://mtodorovic.developpez.com/linux/programmation-avancee
